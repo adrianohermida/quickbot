@@ -19,15 +19,6 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   define: {
-    global: 'globalThis',
-    'process.env': {
-      GOOGLE_SDK_NODE_LOGGING: 'false'
-    },
-    'process.stdout': {},
-    'process.stderr': {},
-    'process.stdin': {},
-    'process.platform': JSON.stringify('browser'),
-    'process.version': JSON.stringify('v16.0.0'),
-    'process.isTTY': false
+    global: 'globalThis'
   }
 });
