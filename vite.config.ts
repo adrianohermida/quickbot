@@ -16,9 +16,13 @@ export default defineConfig({
     })
   ],
   optimizeDeps: {
-    exclude: ['lucide-react'],
+    exclude: ['lucide-react', 'google-logging-utils', 'googleapis-common'],
   },
   define: {
-    global: 'globalThis'
+    global: 'globalThis',
+    'process.env': {},
+    'process.stdout': {},
+    'process.stderr': {},
+    'process.stdin': {},
   }
 });
