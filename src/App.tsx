@@ -13,6 +13,7 @@ import Conversations from './pages/Conversations';
 import Settings from './pages/Settings';
 import Analytics from './pages/Analytics';
 import Integrations from './pages/Integrations';
+import Docs from './pages/Docs';
 import Login from './pages/Login';
 import Unauthorized from './pages/Unauthorized';
 
@@ -76,6 +77,14 @@ function App() {
               element={
                 <PrivateRoute roles={['analyst']}>
                   <Integrations />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="docs"
+              element={
+                <PrivateRoute>
+                  <Docs />
                 </PrivateRoute>
               }
             />
