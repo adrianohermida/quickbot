@@ -16,7 +16,13 @@ export default defineConfig({
     })
   ],
   optimizeDeps: {
-    exclude: ['lucide-react', 'google-logging-utils', 'googleapis-common'],
+    exclude: [
+      'lucide-react',
+      'google-logging-utils',
+      'googleapis-common',
+      'google-auth-library',
+      'google-auth-library-nodejs'
+    ],
     esbuildOptions: {
       // Node.js global to browser globalThis
       define: {
@@ -28,7 +34,11 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       // Externalize deps that shouldn't be bundled
-      external: ['googleapis-common'],
+      external: [
+        'googleapis-common',
+        'google-auth-library',
+        'google-auth-library-nodejs'
+      ],
     }
   },
   define: {
