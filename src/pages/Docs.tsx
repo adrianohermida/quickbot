@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import FileManager from '../components/docs/FileManager';
 import DocumentCreator from '../components/docs/DocumentCreator';
+import ConfigurationRequired from '../components/docs/ConfigurationRequired';
+import { googleConfig } from '../config/google';
 
 const Docs: React.FC = () => {
   const [currentFolderId, setCurrentFolderId] = useState<string | undefined>();
@@ -8,6 +10,10 @@ const Docs: React.FC = () => {
   const handleFolderChange = (folderId?: string) => {
     setCurrentFolderId(folderId);
   };
+
+  if (!googleConfig.docs.enabled) {
+    return <ConfigurationRequired service="Google Docs" />;
+  }
 
   return (
     <div className="space-y-6">
@@ -31,5 +37,3 @@ const Docs: React.FC = () => {
     </div>
   );
 };
-
-export default Docs
