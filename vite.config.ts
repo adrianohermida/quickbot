@@ -17,6 +17,19 @@ export default defineConfig({
   ],
   optimizeDeps: {
     exclude: ['lucide-react', 'google-logging-utils', 'googleapis-common'],
+    esbuildOptions: {
+      // Node.js global to browser globalThis
+      define: {
+        global: 'globalThis'
+      }
+    }
+  },
+  build: {
+    sourcemap: false,
+    rollupOptions: {
+      // Externalize deps that shouldn't be bundled
+      external: ['googleapis-common'],
+    }
   },
   define: {
     global: 'globalThis',
@@ -24,5 +37,8 @@ export default defineConfig({
     'process.stdout': {},
     'process.stderr': {},
     'process.stdin': {},
+    'exports': {},
+    'module.exports': {},
+    'require': 'globalThis.require'
   }
 });
