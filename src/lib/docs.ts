@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { supabase } from './supabase';
+import { googleConfig } from '../config/google';
 
 export interface DocContent {
   title: string;
@@ -13,6 +14,10 @@ export class GoogleDocsService {
   private auth;
 
   constructor(credentials: any) {
+    if (!googleConfig.docs.enabled) {
+      throw new Error('Google Docs integration is not enabled');
+    }
+
     this.auth = new google.auth.OAuth2(
       credentials.client_id,
       credentials.client_secret,
