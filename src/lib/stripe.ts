@@ -1,4 +1,10 @@
+import { createClient } from '@supabase/supabase-js';
 import { products } from '../stripe-config';
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 export async function createCheckoutSession(
   priceId: string,
@@ -31,4 +37,42 @@ export async function createCheckoutSession(
 
 export function getProductByPriceId(priceId: string) {
   return Object.values(products).find((product) => product.priceId === priceId);
+}
+
+export async function getUserSubscription() {
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session) {
+    throw new Error('No active session');
+  }
+
+  const { data: subscription, error } = await supabase
+    .from('stripe_user_subscriptions')
+    .select('*')
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return subscription;
+}
+
+export async function getSubscriptionHistory() {
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session) {
+    throw new Error('No active session');
+  }
+
+  const { data: orders, error } = await supabase
+    .from('stripe_user_orders')
+    .select('*')
+    .order('order_date', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return orders;
 }
