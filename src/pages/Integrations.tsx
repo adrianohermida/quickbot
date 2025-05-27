@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
-import { ExternalLink, CheckCircle, AlertCircle, Table, FileSpreadsheet, Key, Database, Calendar, Clock, Settings } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ExternalLink, CheckCircle, AlertCircle, Table, FileSpreadsheet, Key, Database, Calendar, Clock, Settings, Upload, FolderOpen, FileText } from 'lucide-react';
+import { useGoogleDrive } from '../hooks/useGoogleDrive';
+import { useAuth } from '../contexts/AuthContext';
+import { getStoredTokens } from '../lib/drive';
 
 interface Integration {
   id: string;
@@ -7,7 +10,7 @@ interface Integration {
   description: string;
   logo: string;
   status: 'connected' | 'disconnected';
-  category: 'crm' | 'communication' | 'analytics' | 'database' | 'calendar' | 'other';
+  category: 'crm' | 'communication' | 'analytics' | 'database' | 'calendar' | 'storage';
 }
 
 interface SheetConfig {
@@ -31,6 +34,9 @@ interface CalendarConfig {
 }
 
 const Integrations: React.FC = () => {
+  const { user } = useAuth();
+  const { connect, loading, error } = useGoogleDrive();
+  const [driveConnected, setDriveConnected] = useState(false);
   const [selectedSheet, setSelectedSheet] = useState<SheetConfig>({
     spreadsheetId: '',
     sheetName: '',
@@ -52,6 +58,16 @@ const Integrations: React.FC = () => {
   const [showSheetConfig, setShowSheetConfig] = useState(false);
   const [showCalendarConfig, setShowCalendarConfig] = useState(false);
 
+  useEffect(() => {
+    const checkDriveConnection = async () => {
+      if (user) {
+        const tokens = await getStoredTokens(user.id);
+        setDriveConnected(!!tokens);
+      }
+    };
+    checkDriveConnection();
+  }, [user]);
+
   const integrations: Integration[] = [
     {
       id: '1',
@@ -63,17 +79,15 @@ const Integrations: React.FC = () => {
     },
     {
       id: '2',
-      name: 'Google Sheets',
-      description: 'Spreadsheet service for data management',
-      logo: 'https://images.pexels.com/photos/12906090/pexels-photo-12906090.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-      status: 'connected',
-      category: 'database'
-    },
-    // ... other integrations
+      name: 'Google Drive',
+      description: 'Cloud storage for documents and files',
+      logo: 'https://images.pexels.com/photos/2882634/pexels-photo-2882634.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+      status: driveConnected ? 'connected' : 'disconnected',
+      category: 'storage'
+    }
   ];
 
   const handleGoogleAuth = () => {
-    // Implement Google OAuth flow
     window.location.href = '/api/auth/google';
   };
 
@@ -93,176 +107,60 @@ const Integrations: React.FC = () => {
         </button>
       </div>
 
-      {/* Google Calendar Configuration */}
+      {/* Google Drive Integration */}
       <div className="bg-white shadow rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
-            <Calendar className="h-8 w-8 text-blue-600 mr-3" />
+            <FolderOpen className="h-8 w-8 text-blue-600 mr-3" />
             <div>
-              <h2 className="text-lg font-medium">Google Calendar Integration</h2>
-              <p className="text-sm text-gray-500">Configure automated meeting scheduling</p>
+              <h2 className="text-lg font-medium">Google Drive Integration</h2>
+              <p className="text-sm text-gray-500">Configure file storage and management</p>
             </div>
           </div>
-          <button
-            onClick={() => setShowCalendarConfig(!showCalendarConfig)}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            {showCalendarConfig ? 'Hide Configuration' : 'Show Configuration'}
-          </button>
+          {driveConnected ? (
+            <span className="flex items-center text-green-600">
+              <CheckCircle size={16} className="mr-1" />
+              Connected
+            </span>
+          ) : (
+            <button
+              onClick={connect}
+              disabled={loading}
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+            >
+              {loading ? 'Connecting...' : 'Connect Drive'}
+            </button>
+          )}
         </div>
 
-        {showCalendarConfig && (
-          <div className="space-y-6">
-            {/* Authentication Section */}
-            <div className="border-b pb-6">
-              <h3 className="text-sm font-medium text-gray-600 mb-4">Google Authentication</h3>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-700">Connect your Google account to access calendar</p>
-                  <p className="text-xs text-gray-500 mt-1">Required permissions: Google Calendar API access</p>
-                </div>
-                <button
-                  onClick={handleGoogleAuth}
-                  className="flex items-center px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
-                >
-                  <Key className="h-4 w-4 mr-2" />
-                  Authenticate with Google
-                </button>
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
+            {error}
+          </div>
+        )}
+
+        {driveConnected && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+              <div className="flex items-center">
+                <Upload size={16} className="text-gray-600 mr-2" />
+                <span className="text-sm">Auto-upload files</span>
               </div>
+              <label className="inline-flex items-center cursor-pointer">
+                <input type="checkbox" className="sr-only peer" checked />
+                <div className="relative w-11 h-6 bg-gray-200 peer-checked:bg-blue-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+              </label>
             </div>
 
-            {/* Calendar Settings */}
-            <div className="border-b pb-6">
-              <h3 className="text-sm font-medium text-gray-600 mb-4">Calendar Settings</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Calendar ID
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="primary or calendar ID"
-                    onChange={handleCalendarSelect}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Working Hours Start
-                    </label>
-                    <input
-                      type="time"
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={calendarConfig.workingHours.start}
-                      onChange={(e) => setCalendarConfig({
-                        ...calendarConfig,
-                        workingHours: { ...calendarConfig.workingHours, start: e.target.value }
-                      })}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Working Hours End
-                    </label>
-                    <input
-                      type="time"
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={calendarConfig.workingHours.end}
-                      onChange={(e) => setCalendarConfig({
-                        ...calendarConfig,
-                        workingHours: { ...calendarConfig.workingHours, end: e.target.value }
-                      })}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Default Meeting Duration (minutes)
-                    </label>
-                    <input
-                      type="number"
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={calendarConfig.defaultDuration}
-                      onChange={(e) => setCalendarConfig({
-                        ...calendarConfig,
-                        defaultDuration: parseInt(e.target.value)
-                      })}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Buffer Time (minutes)
-                    </label>
-                    <input
-                      type="number"
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={calendarConfig.bufferTime}
-                      onChange={(e) => setCalendarConfig({
-                        ...calendarConfig,
-                        bufferTime: parseInt(e.target.value)
-                      })}
-                    />
-                  </div>
-                </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+              <div className="flex items-center">
+                <FileText size={16} className="text-gray-600 mr-2" />
+                <span className="text-sm">Organize by conversation</span>
               </div>
-            </div>
-
-            {/* Meeting Types */}
-            <div className="pb-6">
-              <h3 className="text-sm font-medium text-gray-600 mb-4">Meeting Types</h3>
-              <div className="space-y-4">
-                {calendarConfig.meetingTypes.map((type, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <input
-                      type="text"
-                      className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={type}
-                      onChange={(e) => {
-                        const newTypes = [...calendarConfig.meetingTypes];
-                        newTypes[index] = e.target.value;
-                        setCalendarConfig({
-                          ...calendarConfig,
-                          meetingTypes: newTypes
-                        });
-                      }}
-                    />
-                    <button
-                      onClick={() => {
-                        const newTypes = calendarConfig.meetingTypes.filter((_, i) => i !== index);
-                        setCalendarConfig({
-                          ...calendarConfig,
-                          meetingTypes: newTypes
-                        });
-                      }}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-                <button
-                  onClick={() => setCalendarConfig({
-                    ...calendarConfig,
-                    meetingTypes: [...calendarConfig.meetingTypes, '']
-                  })}
-                  className="text-blue-600 hover:text-blue-800 text-sm"
-                >
-                  + Add Meeting Type
-                </button>
-              </div>
-            </div>
-
-            <div className="flex justify-end space-x-3">
-              <button className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-                Test Connection
-              </button>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                Save Configuration
-              </button>
+              <label className="inline-flex items-center cursor-pointer">
+                <input type="checkbox" className="sr-only peer" checked />
+                <div className="relative w-11 h-6 bg-gray-200 peer-checked:bg-blue-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+              </label>
             </div>
           </div>
         )}
