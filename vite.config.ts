@@ -21,6 +21,7 @@ export default defineConfig({
   define: {
     global: 'globalThis',
     'process.env': {},
+    'process.env.GOOGLE_SDK_NODE_LOGGING': JSON.stringify('off'),
     'process.stdout': {},
     'process.stderr': {},
     'process.stdin': {},

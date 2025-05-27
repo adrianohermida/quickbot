@@ -4,7 +4,8 @@ import { google } from 'npm:googleapis@131.0.0';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': '*',
+  'Access-Control-Max-Age': '86400',
 };
 
 Deno.serve(async (req) => {
@@ -17,7 +18,33 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (req.method !== 'POST') {
+      return new Response(
+        JSON.stringify({ error: 'Method not allowed' }),
+        { 
+          status: 405,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+
     const { formId, responseId } = await req.json();
+
+    if (!formId || !responseId) {
+      return new Response(
+        JSON.stringify({ error: 'Missing required fields' }),
+        { 
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
 
     // Initialize Forms API
     const auth = new google.auth.GoogleAuth({
@@ -47,9 +74,11 @@ Deno.serve(async (req) => {
         form_id: formId,
         response_id: responseId,
         data: response.data,
+        created_at: new Date().toISOString()
       });
 
       if (error) {
+        console.error('Database error:', error);
         throw error;
       }
     }
@@ -66,7 +95,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Webhook error:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: error.message || 'Internal server error' }),
       { 
         status: 500, 
         headers: { 
