@@ -98,3 +98,5 @@ const DocumentCreator: React.FC<DocumentCreatorProps> = ({ currentFolderId, onDo
     </div>
   );
 };
+
+export default DocumentCreator

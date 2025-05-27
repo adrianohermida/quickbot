@@ -236,3 +236,5 @@ const FileManager: React.FC<FileManagerProps> = ({ currentFolderId, onFolderChan
     </div>
   );
 };
+
+export default FileManager
