@@ -24,7 +24,12 @@ export default defineConfig({
       'google-auth-library-nodejs',
       'gcp-metadata',
       'google-p12-pem',
-      'gtoken'
+      'gtoken',
+      '@googleapis/docs',
+      '@googleapis/drive',
+      '@googleapis/forms',
+      '@googleapis/sheets',
+      '@googleapis/calendar'
     ],
     esbuildOptions: {
       define: {
@@ -43,7 +48,12 @@ export default defineConfig({
         'google-auth-library-nodejs',
         'gcp-metadata',
         'google-p12-pem',
-        'gtoken'
+        'gtoken',
+        '@googleapis/docs',
+        '@googleapis/drive',
+        '@googleapis/forms',
+        '@googleapis/sheets',
+        '@googleapis/calendar'
       ],
     }
   },
