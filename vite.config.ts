@@ -19,6 +19,7 @@ export default defineConfig({
       'lucide-react',
       'google-logging-utils',
       'googleapis-common',
+      'googleapis-common/*',
       'google-auth-library',
       'google-auth-library-nodejs',
       'gcp-metadata',
@@ -28,7 +29,8 @@ export default defineConfig({
     esbuildOptions: {
       define: {
         global: 'globalThis'
-      }
+      },
+      sourcemap: false
     }
   },
   build: {
@@ -36,6 +38,7 @@ export default defineConfig({
     rollupOptions: {
       external: [
         'googleapis-common',
+        'googleapis-common/*',
         'google-auth-library',
         'google-auth-library-nodejs',
         'gcp-metadata',
