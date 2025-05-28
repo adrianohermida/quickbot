@@ -2,6 +2,23 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
+// Split Google API dependencies into smaller chunks
+const googleApiDependencies = [
+  '@googleapis/docs',
+  '@googleapis/drive',
+  '@googleapis/forms',
+  '@googleapis/sheets',
+  '@googleapis/calendar'
+];
+
+const googleAuthDependencies = [
+  'google-auth-library',
+  'google-auth-library-nodejs',
+  'gcp-metadata',
+  'google-p12-pem',
+  'gtoken'
+];
+
 export default defineConfig({
   plugins: [
     react(),
@@ -19,42 +36,33 @@ export default defineConfig({
       'lucide-react',
       'google-logging-utils',
       'googleapis-common',
-      'googleapis-common/*',
-      'google-auth-library',
-      'google-auth-library-nodejs',
-      'gcp-metadata',
-      'google-p12-pem',
-      'gtoken',
-      '@googleapis/docs',
-      '@googleapis/drive',
-      '@googleapis/forms',
-      '@googleapis/sheets',
-      '@googleapis/calendar'
+      ...googleApiDependencies,
+      ...googleAuthDependencies
     ],
+    include: [],
     esbuildOptions: {
       define: {
         global: 'globalThis'
       },
-      sourcemap: false
+      sourcemap: false,
+      target: 'es2020'
     }
   },
   build: {
     sourcemap: false,
+    target: 'es2020',
     rollupOptions: {
       external: [
         'googleapis-common',
-        'googleapis-common/*',
-        'google-auth-library',
-        'google-auth-library-nodejs',
-        'gcp-metadata',
-        'google-p12-pem',
-        'gtoken',
-        '@googleapis/docs',
-        '@googleapis/drive',
-        '@googleapis/forms',
-        '@googleapis/sheets',
-        '@googleapis/calendar'
+        ...googleApiDependencies,
+        ...googleAuthDependencies
       ],
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          google: googleApiDependencies
+        }
+      }
     }
   },
   define: {
