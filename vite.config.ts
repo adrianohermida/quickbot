@@ -2,7 +2,6 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
@@ -21,10 +20,12 @@ export default defineConfig({
       'google-logging-utils',
       'googleapis-common',
       'google-auth-library',
-      'google-auth-library-nodejs'
+      'google-auth-library-nodejs',
+      'gcp-metadata',
+      'google-p12-pem',
+      'gtoken'
     ],
     esbuildOptions: {
-      // Node.js global to browser globalThis
       define: {
         global: 'globalThis'
       }
@@ -33,11 +34,13 @@ export default defineConfig({
   build: {
     sourcemap: false,
     rollupOptions: {
-      // Externalize deps that shouldn't be bundled
       external: [
         'googleapis-common',
         'google-auth-library',
-        'google-auth-library-nodejs'
+        'google-auth-library-nodejs',
+        'gcp-metadata',
+        'google-p12-pem',
+        'gtoken'
       ],
     }
   },
@@ -49,6 +52,12 @@ export default defineConfig({
     'process.stdin': {},
     'exports': {},
     'module.exports': {},
-    'require': 'globalThis.require'
+    'require': 'globalThis.require',
+    'process.version': '"v16.0.0"',
+    'process.versions': {
+      node: '16.0.0'
+    },
+    'process.platform': '"browser"',
+    'process.env.READABLE_STREAM': '"disable"'
   }
 });
