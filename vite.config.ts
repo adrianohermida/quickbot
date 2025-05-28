@@ -19,6 +19,16 @@ const googleAuthDependencies = [
   'gtoken'
 ];
 
+// Additional dependencies to exclude from optimization
+const additionalExcludes = [
+  'googleapis-common',
+  'google-auth-library-nodejs',
+  'google-logging-utils',
+  '@google-cloud/common',
+  '@google-cloud/projectify',
+  '@google-cloud/promisify'
+];
+
 export default defineConfig({
   plugins: [
     react(),
@@ -34,8 +44,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: [
       'lucide-react',
-      'google-logging-utils',
-      'googleapis-common',
+      ...additionalExcludes,
       ...googleApiDependencies,
       ...googleAuthDependencies
     ],
@@ -53,7 +62,7 @@ export default defineConfig({
     target: 'es2020',
     rollupOptions: {
       external: [
-        'googleapis-common',
+        ...additionalExcludes,
         ...googleApiDependencies,
         ...googleAuthDependencies
       ],
