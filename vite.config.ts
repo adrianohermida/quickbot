@@ -2,33 +2,6 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
-// Split Google API dependencies into smaller chunks
-const googleApiDependencies = [
-  '@googleapis/docs',
-  '@googleapis/drive',
-  '@googleapis/forms',
-  '@googleapis/sheets',
-  '@googleapis/calendar'
-];
-
-const googleAuthDependencies = [
-  'google-auth-library',
-  'google-auth-library-nodejs',
-  'gcp-metadata',
-  'google-p12-pem',
-  'gtoken'
-];
-
-// Additional dependencies to exclude from optimization
-const additionalExcludes = [
-  'googleapis-common',
-  'google-auth-library-nodejs',
-  'google-logging-utils',
-  '@google-cloud/common',
-  '@google-cloud/projectify',
-  '@google-cloud/promisify'
-];
-
 export default defineConfig({
   plugins: [
     react(),
@@ -42,12 +15,7 @@ export default defineConfig({
     })
   ],
   optimizeDeps: {
-    exclude: [
-      'lucide-react',
-      ...additionalExcludes,
-      ...googleApiDependencies,
-      ...googleAuthDependencies
-    ],
+    exclude: ['lucide-react'],
     include: [],
     esbuildOptions: {
       define: {
@@ -61,15 +29,9 @@ export default defineConfig({
     sourcemap: false,
     target: 'es2020',
     rollupOptions: {
-      external: [
-        ...additionalExcludes,
-        ...googleApiDependencies,
-        ...googleAuthDependencies
-      ],
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          google: googleApiDependencies
+          vendor: ['react', 'react-dom']
         }
       }
     }
@@ -82,12 +44,6 @@ export default defineConfig({
     'process.stdin': {},
     'exports': {},
     'module.exports': {},
-    'require': 'globalThis.require',
-    'process.version': '"v16.0.0"',
-    'process.versions': {
-      node: '16.0.0'
-    },
-    'process.platform': '"browser"',
-    'process.env.READABLE_STREAM': '"disable"'
+    'require': 'globalThis.require'
   }
 });
